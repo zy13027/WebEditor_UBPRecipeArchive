@@ -1,0 +1,6 @@
+winget=True
+choco=False
+scoop=False
+gh=False
+GH_TOKEN=False
+GITHUB_TOKEN=False
