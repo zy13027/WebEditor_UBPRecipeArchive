@@ -2,31 +2,53 @@ import type { PatternBox, PatternState } from "./types";
 
 type Listener = (state: PatternState) => void;
 
+
+
 const initialState: PatternState = {
     patternName: 'Pattern',
+
     palletLength: 0,
     palletWidth: 0,
     palletHeight: 0,
+
     boxLength: 0,
     boxWidth: 0,
     boxHeight: 0,
+
     patternCount: 0,
     layers: 0,
+
     boxes: [],
+
     selectedIds: [],
     selectedBoxId: null,
+
+    selectionMode: false,
     dirty: false,
+    syncState: 'idle',
+    statusText: 'Idle',
+    lastError: null,
+
     connected: false,
     saving: false,
-    message: 'Connecting...',
+    message: 'Idle',
     connectionStatus: 'connecting',
     operationStatus: 'idle',
     operationMessage: '',
+
+    recipeId: 0,
+    patternIndex: 1,
+    mirrorX: false,
+    mirrorY: false,
+    layerOffsetX_mm: 0,
+    layerOffsetY_mm: 0,
 };
+
 
 export class EditorStore {
     private state: PatternState = structuredClone(initialState);
     private listeners: Listener[] = [];
+
 
     private emit(): void {
         for (const listener of this.listeners) {
@@ -148,6 +170,18 @@ export class EditorStore {
         this.emit();
     }
 
+    toggleSelectionMode(): void {
+        const entering = !this.state.selectionMode;
+        this.state = {
+            ...this.state,
+            selectionMode: entering,
+            // clear selection when exiting
+            selectedIds: entering ? this.state.selectedIds : [],
+            selectedBoxId: entering ? this.state.selectedBoxId : null
+        };
+        this.emit();
+    }
+
     addBox(): void {
         const nextId = this.state.boxes.length
             ? Math.max(...this.state.boxes.map((b) => b.id)) + 1
@@ -157,12 +191,13 @@ export class EditorStore {
         const boxWidth = this.state.boxWidth > 0 ? this.state.boxWidth : 150;
 
         const box: PatternBox = {
+            seq: 0,
             id: nextId,
             x: 60,
             y: 60,
-            w: boxLength,
-            h: boxWidth,
-            r: 0
+            l: boxLength,
+            w: boxWidth,
+            rot: 0
         };
 
         this.state = {
@@ -218,17 +253,95 @@ export class EditorStore {
             boxes: this.state.boxes.map((b) => {
                 if (!selected.has(b.id)) return b;
 
-                const nextR = b.r === 0 ? 90 : 0;
+                const nextR = b.rot === 0 ? 90 : 0;
 
                 return {
                     ...b,
-                    r: nextR,
-                    w: b.h,
-                    h: b.w
+                    rot: nextR,
+                    l: b.w,
+                    w: b.l
                 };
             }),
             dirty: true,
             message: "Selected box(es) rotated"
+        };
+        this.emit();
+    }
+
+    alignBoxesHorizontally(): void {
+        const anchorId = this.state.selectedBoxId;
+        const selectedIds = this.state.selectedIds.length
+            ? new Set(this.state.selectedIds)
+            : anchorId !== null
+                ? new Set([anchorId])
+                : new Set<number>();
+        if (!selectedIds.size) return;
+
+        const anchor = anchorId !== null
+            ? this.state.boxes.find((b) => b.id === anchorId && selectedIds.has(b.id))
+            : this.state.boxes.find((b) => selectedIds.has(b.id));
+        if (!anchor) return;
+
+        const boxes = this.state.boxes.map((box) => {
+            if (!selectedIds.has(box.id) || box.y === anchor.y) {
+                return box;
+            }
+
+            return {
+                ...box,
+                y: anchor.y,
+            };
+        });
+
+        const changed = boxes.some((box, index) => box !== this.state.boxes[index]);
+        if (!changed) return;
+
+        this.state = {
+            ...this.state,
+            boxes,
+            dirty: true,
+            syncState: 'dirty',
+            statusText: 'Selected boxes aligned horizontally (local)',
+            message: 'Selected boxes aligned horizontally'
+        };
+        this.emit();
+    }
+
+    alignBoxesVertically(): void {
+        const anchorId = this.state.selectedBoxId;
+        const selectedIds = this.state.selectedIds.length
+            ? new Set(this.state.selectedIds)
+            : anchorId !== null
+                ? new Set([anchorId])
+                : new Set<number>();
+        if (!selectedIds.size) return;
+
+        const anchor = anchorId !== null
+            ? this.state.boxes.find((b) => b.id === anchorId && selectedIds.has(b.id))
+            : this.state.boxes.find((b) => selectedIds.has(b.id));
+        if (!anchor) return;
+
+        const boxes = this.state.boxes.map((box) => {
+            if (!selectedIds.has(box.id) || box.x === anchor.x) {
+                return box;
+            }
+
+            return {
+                ...box,
+                x: anchor.x,
+            };
+        });
+
+        const changed = boxes.some((box, index) => box !== this.state.boxes[index]);
+        if (!changed) return;
+
+        this.state = {
+            ...this.state,
+            boxes,
+            dirty: true,
+            syncState: 'dirty',
+            statusText: 'Selected boxes aligned vertically (local)',
+            message: 'Selected boxes aligned vertically'
         };
         this.emit();
     }
@@ -244,7 +357,9 @@ export class EditorStore {
                     ? {
                         ...b,
                         x: b.x + dx,
-                        y: b.y + dy
+                        y: b.y + dy,
+                        x_mm: b.x + dx,
+                        y_mm: b.y + dy
                     }
                     : b
             ),
@@ -265,7 +380,7 @@ export class EditorStore {
         this.state = {
             ...this.state,
             boxes: this.state.boxes.map((b) =>
-                selected.has(b.id) ? { ...b, x: minX } : b
+                selected.has(b.id) ? { ...b, x: minX, x_mm: minX } : b
             ),
             dirty: true
         };
@@ -284,7 +399,7 @@ export class EditorStore {
         this.state = {
             ...this.state,
             boxes: this.state.boxes.map((b) =>
-                selected.has(b.id) ? { ...b, y: minY } : b
+                selected.has(b.id) ? { ...b, y: minY, y_mm: minY } : b
             ),
             dirty: true
         };
@@ -314,4 +429,59 @@ export class EditorStore {
         };
         this.emit();
     }
+
+    setLoading(): void {
+        this.patch({
+            connected: false,
+            saving: false,
+            message: 'Loading from PLC...',
+            operationMessage: '',
+        });
+    }
+
+    loadSnapshot(snapshot: PatternState): void {
+        this.state = {
+            ...snapshot,
+            connected: true,
+            saving: false,
+            operationMessage: 'Loaded from PLC',
+        };
+        this.emit();
+    }
+
+    setApplying(): void {
+        this.patch({
+            saving: true,
+            message: 'Applying to PLC...',
+            operationMessage: 'Applying to PLC...',
+        });
+    }
+
+    setApplied(): void {
+        this.patch({
+            saving: false,
+            connected: true,
+            operationMessage: 'Applied to PLC',
+        });
+    }
+
+    setSaved(): void {
+        this.patch({
+            saving: false,
+            connected: true,
+            operationMessage: 'Saved to archive',
+        });
+    }
+
+    setError(message: string): void {
+        this.patch({
+            saving: false,
+            operationMessage: message,
+        });
+    }
+
+
+
+
+
 }

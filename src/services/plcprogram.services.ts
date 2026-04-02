@@ -95,3 +95,9 @@ export async function readMany(paths: string[]): Promise<unknown[]> {
     return item.result;
   });
 }
+
+export async function writeMany(items: Array<{ path: string; value: unknown }>): Promise<void> {
+  for (const item of items) {
+    await writeTag(item.path, item.value);
+  }
+}

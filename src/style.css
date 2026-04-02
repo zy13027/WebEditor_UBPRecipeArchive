@@ -245,6 +245,27 @@ img {
 }
 
 
+.op-btn.select-mode {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #7dd3fc;
+}
+
+.op-btn.select-mode:hover {
+  background: #e0f2fe;
+}
+
+.op-btn.select-mode.active {
+  background: #0369a1;
+  color: #fff;
+  border-color: #0369a1;
+}
+
+.op-btn.select-mode.active:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+}
+
 .op-btn.danger {
   background: #fff4f4;
   color: #b42318;
@@ -323,6 +344,14 @@ img {
   font-weight: 700;
   pointer-events: none;
   user-select: none;
+}
+
+.rubber-band {
+  fill: rgba(47, 128, 255, 0.08);
+  stroke: #2f80ff;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  pointer-events: none;
 }
 
 .details {

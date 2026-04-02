@@ -7,12 +7,15 @@ import {
 import {
     readBoxes,
     readEditorHeader,
-    triggerSave
+    triggerSave,
+    readEditorSnapshot,
+    applyEditorSnapshot,
 } from "./services/pallet-editor.services";
 
 import { EditorStore } from "./store";
 import { EditorRenderer } from "./renderer";
 import { EditorInteractions } from "./interactions";
+import { fromPlcPattern, toPlcPattern } from "./plc-mapper";
 
 const DEFAULT_PLC_IP = "192.168.0.10";
 
@@ -29,10 +32,11 @@ function positiveOr(value: number | undefined, fallback: number): number {
 
 function toPalletEditorModel(state: ReturnType<EditorStore["getState"]>) {
     return {
-        recipeId: 0,
+        recipeId: state.recipeId,
         name: state.patternName,
         palletLength_mm: state.palletLength,
         palletWidth_mm: state.palletWidth,
+        palletHeight_mm: state.palletHeight,
         boxLength_mm: state.boxLength,
         boxWidth_mm: state.boxWidth,
         boxHeight_mm: state.boxHeight,
@@ -41,20 +45,20 @@ function toPalletEditorModel(state: ReturnType<EditorStore["getState"]>) {
         valid: true,
 
         boxCount: state.boxes.length,
-        selectedPattern: 0,
+        selectedPattern: state.patternIndex,
         selectedBox: state.selectedBoxId ?? 0,
-        mirrorX: false,
-        mirrorY: false,
-        layerOffsetX_mm: 0,
-        layerOffsetY_mm: 0,
+        mirrorX: state.mirrorX,
+        mirrorY: state.mirrorY,
+        layerOffsetX_mm: state.layerOffsetX_mm,
+        layerOffsetY_mm: state.layerOffsetY_mm,
 
         boxes: state.boxes.map((b, index) => ({
             id: Number(b.id),
             x_mm: Math.round(b.x),
             y_mm: Math.round(b.y),
-            seq: index + 1,
-            rot: Number(b.r ?? 0),
-            flags: 0
+            seq: b.seq || index + 1,
+            rot: Number(b.rot ?? 0),
+            flags: b.flags ?? 0
         }))
     };
 }
@@ -84,6 +88,76 @@ async function bootstrap(): Promise<void> {
     const addBoxBtn = app.querySelector<HTMLButtonElement>("#addBoxBtn");
     const rotateBoxBtn = app.querySelector<HTMLButtonElement>("#rotateBoxBtn");
     const deleteBoxBtn = app.querySelector<HTMLButtonElement>("#deleteBoxBtn");
+    const selectModeBtn = app.querySelector<HTMLButtonElement>("#selectModeBtn");
+
+    async function loadEditor(store: EditorStore) {
+        try {
+            store.setLoading();
+            const plcModel = await readEditorSnapshot();
+            const state = fromPlcPattern(plcModel);
+            store.loadSnapshot(state);
+        } catch (error) {
+            store.setError(`Load failed: ${String(error)}`);
+        }
+    }
+
+    async function applyEditor(store: EditorStore) {
+        try {
+            store.setApplying?.();
+            const plcModel = toPlcPattern(store.getState());
+            await applyEditorSnapshot(plcModel);
+            store.setApplied();
+        } catch (error) {
+            store.setError(`Apply failed: ${String(error)}`);
+        }
+    }
+
+    async function saveEditor(store: EditorStore) {
+        try {
+            store.setApplying();
+            const model = toPalletEditorModel(store.getState());
+            await triggerSave(model);
+            store.setSaved();
+        } catch (error) {
+            store.setError(`Save failed: ${String(error)}`);
+        }
+    }
+
+    document.getElementById("btnAlignH")?.addEventListener("click", () => {
+        store.alignBoxesHorizontally();
+    });
+
+    document.getElementById("btnAlignV")?.addEventListener("click", () => {
+        store.alignBoxesVertically();
+    });
+
+    document.getElementById("btnApply")?.addEventListener("click", async () => {
+        await applyEditor(store);
+    });
+
+    document.getElementById("btnSave")?.addEventListener("click", async () => {
+        await saveEditor(store);
+    });
+
+    document.getElementById("btnReload")?.addEventListener("click", async () => {
+        await loadEditor(store);
+    });
+
+    document.getElementById("btnRotate")?.addEventListener("click", () => {
+        const id = store.getState().selectedIds[0];
+        if (id != null) {
+            store.rotateSelected();
+        }
+    });
+
+    document.getElementById("btnDelete")?.addEventListener("click", () => {
+        const id = store.getState().selectedIds[0];
+        if (id != null) {
+            store.deleteSelected();
+        }
+    });
+
+
 
     async function loadPattern(): Promise<void> {
         try {
@@ -94,6 +168,8 @@ async function bootstrap(): Promise<void> {
 
             const palletLength = positiveOr(header.palletLength_mm, 1200);
             const palletWidth = positiveOr(header.palletWidth_mm, 1000);
+            const palletHeight = positiveOr(header.palletHeight_mm, 0);
+
             const boxLength = positiveOr(header.boxLength_mm, 200);
             const boxWidth = positiveOr(header.boxWidth_mm, 150);
             const boxHeight = positiveOr(header.boxHeight_mm, 100);
@@ -106,6 +182,8 @@ async function bootstrap(): Promise<void> {
                 patternName: header.name && header.name.trim() ? header.name : "Pattern",
                 palletLength,
                 palletWidth,
+                palletHeight,
+
                 boxLength,
                 boxWidth,
                 boxHeight,
@@ -117,9 +195,13 @@ async function bootstrap(): Promise<void> {
                         id: b.id,
                         x: b.x_mm,
                         y: b.y_mm,
-                        r: rotated ? 90 : 0,
-                        w: rotated ? boxWidth : boxLength,
-                        h: rotated ? boxLength : boxWidth
+                        x_mm: b.x_mm,
+                        y_mm: b.y_mm,
+                        seq: b.seq,
+                        flags: b.flags,
+                        rot: rotated ? 90 : 0,
+                        l: rotated ? boxWidth : boxLength,
+                        w: rotated ? boxLength : boxWidth
                     };
                 }),
                 selectedIds: [],
@@ -137,6 +219,10 @@ async function bootstrap(): Promise<void> {
             store.setOperationStatus("load-error", getErrorMessage(error));
         }
     }
+
+    selectModeBtn?.addEventListener("click", () => {
+        store.toggleSelectionMode();
+    });
 
     loadBtn?.addEventListener("click", () => {
         void loadPattern();

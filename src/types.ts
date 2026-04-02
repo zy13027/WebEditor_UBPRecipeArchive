@@ -4,28 +4,51 @@ export interface PatternBox {
     id: number;
     x: number;
     y: number;
+    l: number;
     w: number;
-    h: number;
-    r: Rotation;
+    rot: Rotation;
+    seq: number;
+    flags?: number;
+    selected?: boolean;
 }
 
 export interface PatternState {
+    recipeId: number;
+    patternIndex: number;
     patternName: string;
+
     palletWidth: number;
     palletHeight: number;
+    palletLength: number;
+
+
     boxLength: number;
     boxWidth: number;
     boxHeight: number;
+
+    patternCount: number;
+    layers: number;
+
     boxes: PatternBox[];
     selectedIds: number[];
+    selectedBoxId: number | null;
+
+    mirrorX: boolean;
+    mirrorY: boolean;
+    layerOffsetX_mm: number;
+    layerOffsetY_mm: number;
+
+    selectionMode: boolean;
     dirty: boolean;
+    syncState: 'idle' | 'loading' | 'loaded' | 'dirty' | 'applying' | 'applied' | 'saving' | 'saved' | 'error';
+    statusText: string;
+    lastError: string | null;
+
     connected: boolean;
     saving: boolean;
     message: string;   
-    palletLength: number;  
-    patternCount: number;
-    layers: number;
-    selectedBoxId: number | null;
+
+
     connectionStatus: ConnectionStatus;
     operationStatus: OperationStatus;
     operationMessage: string;
@@ -58,4 +81,16 @@ export type OperationStatus =
     | 'save-success'
     | 'save-error';
 
+
+
+export type SyncState =
+    | 'idle'
+    | 'loading'
+    | 'loaded'
+    | 'dirty'
+    | 'applying'
+    | 'applied'
+    | 'saving'
+    | 'saved'
+    | 'error';
 

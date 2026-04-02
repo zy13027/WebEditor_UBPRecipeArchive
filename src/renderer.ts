@@ -37,7 +37,10 @@ export class EditorRenderer {
                 <button type="button" id="loadBtn" class="op-btn">Load</button>
                 <button type="button" id="saveBtn" class="op-btn primary">Save</button>
                 <button type="button" id="addBoxBtn" class="op-btn">Add Box</button>
-                 <button type="button" id="rotateBoxBtn" class="op-btn secondary">Rotate Box</button>
+                <button type="button" id="rotateBoxBtn" class="op-btn secondary">Rotate Box</button>
+                <button type="button" id="selectModeBtn" class="op-btn select-mode">Select</button>
+                <button type="button" id="btnAlignH" class="op-btn secondary">Align Herizontally</button>
+                <button type="button" id="btnAlignV" class="op-btn secondary">Align Vertically</button>
                 <button type="button" id="deleteBoxBtn" class="op-btn danger">Delete Box</button>
                 
               </div>
@@ -84,10 +87,20 @@ export class EditorRenderer {
 
     render(state: PatternState): void {
         this.renderStatus(state);
+        this.renderSelectionModeBtn(state);
         this.renderWorkspaceMeta(state);
         this.renderPallet(state);
         this.renderBoxes(state);
         this.renderDetails(state);
+    }
+
+    private renderSelectionModeBtn(state: PatternState): void {
+        const btn = this.root.querySelector<HTMLButtonElement>("#selectModeBtn");
+        if (!btn) return;
+        btn.classList.toggle("active", state.selectionMode);
+        btn.textContent = state.selectionMode
+            ? `Select (${state.selectedIds.length})`
+            : "Select";
     }
 
     private getConnectionText(state: PatternState): string {
@@ -203,6 +216,8 @@ export class EditorRenderer {
         this.palletGroup.appendChild(label);
 
         this.svg.dataset.scale = String(scale);
+        this.svg.dataset.offsetX = String(offsetX);
+        this.svg.dataset.offsetY = String(offsetY);
     }
 
     private renderBoxes(state: PatternState): void {
@@ -223,7 +238,7 @@ export class EditorRenderer {
         offsetY: number
     ): void {
         const width = Math.max(box.w * scale, 8);
-        const height = Math.max(box.h * scale, 8);
+        const length = Math.max(box.l * scale, 8);
 
         const x = offsetX + box.x * scale;
         const y = offsetY + box.y * scale;
@@ -239,14 +254,14 @@ export class EditorRenderer {
         rect.setAttribute("x", String(x));
         rect.setAttribute("y", String(y));
         rect.setAttribute("width", String(width));
-        rect.setAttribute("height", String(height));
+        rect.setAttribute("height", String(length));
         rect.setAttribute("rx", "4");
         rect.setAttribute("ry", "4");
         rect.setAttribute("class", `box${isSelected ? " selected" : ""}`);
 
         const text = document.createElementNS(SVG_NS, "text");
         text.setAttribute("x", String(x + width / 2));
-        text.setAttribute("y", String(y + height / 2));
+        text.setAttribute("y", String(y + length / 2));
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("dominant-baseline", "middle");
         text.setAttribute("class", "box-label");
@@ -274,8 +289,8 @@ export class EditorRenderer {
         <div class="detail-row"><span>X</span><strong>${selectedBox.x}</strong></div>
         <div class="detail-row"><span>Y</span><strong>${selectedBox.y}</strong></div>
         <div class="detail-row"><span>Width</span><strong>${selectedBox.w}</strong></div>
-        <div class="detail-row"><span>Height</span><strong>${selectedBox.h}</strong></div>
-        <div class="detail-row"><span>Rotation</span><strong>${selectedBox.r}°</strong></div>
+        <div class="detail-row"><span>Length</span><strong>${selectedBox.l}</strong></div>
+        <div class="detail-row"><span>Rotation</span><strong>${selectedBox.rot}°</strong></div>
       </div>
     `;
     }
