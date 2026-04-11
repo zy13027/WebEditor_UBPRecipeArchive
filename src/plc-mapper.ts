@@ -43,6 +43,7 @@ export function fromPlcPattern(model: PalletEditorModel): PatternState {
         selectedIds:model.selectedBox ? [model.selectedBox] : [],
         selectedBoxId,
 
+        selectionMode: false,
 
         mirrorX: model.mirrorX,
         mirrorY: model.mirrorY,
