@@ -131,6 +131,7 @@ export class EditorRenderer {
     private getConnectionText(state: PatternState): string {
         switch (state.connectionStatus) {
             case "connected":  return t('status.connected');
+            case "anonymous":  return t('status.anonymous');
             case "connecting": return t('status.connecting');
             case "error":      return t('status.connectionError');
             default:           return t('status.unknown');

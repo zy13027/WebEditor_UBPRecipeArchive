@@ -34,6 +34,7 @@ const en: Translations = {
 
     // connection / operation status
     'status.connected': 'Connected',
+    'status.anonymous': 'Connected (No Auth)',
     'status.offline': 'Offline',
     'status.connecting': 'Connecting...',
     'status.connectionError': 'Connection error',
@@ -104,6 +105,7 @@ const zhCN: Translations = {
 
     // connection / operation status
     'status.connected': '已连接',
+    'status.anonymous': '已连接 (免认证)',
     'status.offline': '离线',
     'status.connecting': '连接中...',
     'status.connectionError': '连接错误',

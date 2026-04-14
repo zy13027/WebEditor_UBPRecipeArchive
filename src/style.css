@@ -127,6 +127,12 @@ img {
   border-color: #b7e4d2;
 }
 
+.status-badge.connection.anonymous {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
 .status-badge.connection.connecting {
   background: #fff4db;
   color: #9a6b00;

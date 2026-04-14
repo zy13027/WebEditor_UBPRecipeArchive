@@ -71,7 +71,7 @@ export interface PlcPatternPayload {
 }
 
 
-export type ConnectionStatus = 'connecting' | 'connected' | 'error';
+export type ConnectionStatus = 'connecting' | 'connected' | 'anonymous' | 'error';
 
 export type OperationStatus =
     | 'idle'

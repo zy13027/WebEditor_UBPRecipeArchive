@@ -78,7 +78,9 @@ export class EditorStore {
         this.state = {
             ...this.state,
             connectionStatus: status,
-            connected: status === 'connected',
+            // Both 'connected' (authenticated) and 'anonymous' (AC disabled)
+            // mean the PLC is reachable and operations can proceed.
+            connected: status === 'connected' || status === 'anonymous',
         };
         this.emit();
     }

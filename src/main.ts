@@ -296,16 +296,19 @@ async function bootstrap(): Promise<void> {
         store.setConnectionStatus("connecting");
         store.setOperationStatus("loading", "Connecting to PLC...");
 
-        const ok = await silentLoginAtStartup(DEFAULT_PLC_IP);
+        const authMode = await silentLoginAtStartup(DEFAULT_PLC_IP);
 
-        if (!ok) {
-            store.setConnectionStatus("error");
-            store.setOperationStatus("load-error", "Silent login failed");
-            return;
+        if (authMode === 'authenticated') {
+            // AC enabled and login succeeded — use token for all requests.
+            store.setConnectionStatus("connected");
+            startPeriodicLogin(DEFAULT_PLC_IP);
+        } else {
+            // AC disabled or login failed — proceed without a token.
+            // PLC ops will use an empty token; the PLC accepts this when AC is off.
+            // If AC is on and login genuinely failed, individual ops will surface
+            // permission-denied errors without crashing the app.
+            store.setConnectionStatus("anonymous");
         }
-
-        store.setConnectionStatus("connected");
-        startPeriodicLogin(DEFAULT_PLC_IP);
 
         // Sync language from HMI immediately, then every 5 s
         await pollHmiLanguage();
