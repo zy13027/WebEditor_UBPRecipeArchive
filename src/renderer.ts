@@ -9,6 +9,7 @@ export class EditorRenderer {
     private readonly statusEl: HTMLElement;
     private readonly detailsEl: HTMLElement;
     private readonly workspaceMetaEl: HTMLElement;
+    private readonly contextBarEl: HTMLElement;
     private readonly svg: SVGSVGElement;
     private readonly palletGroup: SVGGElement;
     private readonly boxGroup: SVGGElement;
@@ -31,6 +32,8 @@ export class EditorRenderer {
             <div id="statusText"></div>
           </div>
         </header>
+
+        <div id="contextBar" class="context-bar"></div>
 
         <div class="editor-shell">
           <main class="editor-grid">
@@ -65,6 +68,7 @@ export class EditorRenderer {
     `;
 
         this.statusEl = this.root.querySelector("#statusText") as HTMLElement;
+        this.contextBarEl = this.root.querySelector("#contextBar") as HTMLElement;
         this.detailsEl = this.root.querySelector("#details") as HTMLElement;
         this.workspaceMetaEl = this.root.querySelector("#workspaceMeta") as HTMLElement;
 
@@ -90,6 +94,7 @@ export class EditorRenderer {
     render(state: PatternState): void {
         this.renderLabels(state);
         this.renderStatus(state);
+        this.renderContextBar(state);
         this.renderSelectionModeBtn(state);
         this.renderWorkspaceMeta(state);
         this.renderPallet(state);
@@ -117,6 +122,45 @@ export class EditorRenderer {
         setText('deleteBoxBtn', 'btn.deleteBox');
         setText('labelWorkspace', 'label.workspace');
         setText('labelSelectedBox', 'label.selectedBox');
+    }
+
+    private renderContextBar(state: PatternState): void {
+        const recipe  = state.recipeId      > 0 ? String(state.recipeId)      : '—';
+        const layer   = state.selectedLayer > 0 ? String(state.selectedLayer) : '—';
+        const pattern = state.patternIndex  > 0 ? String(state.patternIndex)  : '—';
+        const name    = state.patternName   || t('label.unnamed');
+
+        this.contextBarEl.innerHTML = `
+      <div class="context-bar-inner">
+        <div class="context-bar-fields">
+          <span class="context-field">
+            <span class="context-field-label">${t('context.recipe')}</span>
+            <span class="context-field-value">${recipe}</span>
+          </span>
+          <span class="context-bar-sep">·</span>
+          <span class="context-field">
+            <span class="context-field-label">${t('context.name')}</span>
+            <span class="context-field-value">${name}</span>
+          </span>
+          <span class="context-bar-sep">·</span>
+          <span class="context-field">
+            <span class="context-field-label">${t('context.layer')}</span>
+            <span class="context-field-value">${layer}</span>
+          </span>
+          <span class="context-bar-sep">·</span>
+          <span class="context-field">
+            <span class="context-field-label">${t('context.pattern')}</span>
+            <span class="context-field-value">${pattern}</span>
+          </span>
+          <span class="context-bar-sep">·</span>
+          <span class="context-field">
+            <span class="context-field-label">${t('context.pallet')}</span>
+            <span class="context-field-value">${state.palletLength} × ${state.palletWidth} mm</span>
+          </span>
+        </div>
+        <div class="context-staging-note">${t('context.stagingNote')}</div>
+      </div>
+    `;
     }
 
     private renderSelectionModeBtn(state: PatternState): void {
@@ -147,12 +191,13 @@ export class EditorRenderer {
         }
 
         switch (state.operationStatus) {
-            case "loading":      return t('msg.loading');      // "Loading from editor..."
-            case "load-success": return t('msg.loadSuccess');  // "Loaded from editor"
+            case "loading":      return t('msg.loading');      // "Loading from library..."
+            case "load-success": return t('msg.loadSuccess');  // "Loaded from library"
             case "load-error":   return t('msg.loadFailed');
             case "saving":       return t('msg.saving');       // "Saving to editor..."
             case "save-success": return t('msg.saveSuccess');  // "Saved to editor"
             case "save-error":   return t('msg.saveFailed');
+            case "validation-error": return t('msg.validationFailed');
             default:             return "";
         }
     }
@@ -181,31 +226,10 @@ export class EditorRenderer {
     `;
     }
 
-    private renderWorkspaceMeta(state: PatternState): void {
-        const recipe  = state.recipeId      > 0 ? String(state.recipeId)      : '—';
-        const layer   = state.selectedLayer > 0 ? String(state.selectedLayer) : '—';
-        const pattern = state.patternIndex  > 0 ? String(state.patternIndex)  : '—';
-
-        this.workspaceMetaEl.innerHTML = `
-      <div class="context-strip">
-        <span class="context-item">
-          <span class="context-label">${t('context.recipe')}</span>
-          <span class="context-value">${recipe}</span>
-        </span>
-        <span class="context-sep">·</span>
-        <span class="context-item">
-          <span class="context-label">${t('context.layer')}</span>
-          <span class="context-value">${layer}</span>
-        </span>
-        <span class="context-sep">·</span>
-        <span class="context-item">
-          <span class="context-label">${t('context.pattern')}</span>
-          <span class="context-value">${pattern}</span>
-        </span>
-      </div>
-      <div class="meta-row"><strong>${state.patternName || t('label.unnamed')}</strong></div>
-      <div class="meta-row">${state.palletLength} × ${state.palletWidth} mm</div>
-    `;
+    private renderWorkspaceMeta(_state: PatternState): void {
+        // Context details are shown in the context bar above the editor.
+        // This element is kept for spacing; content is intentionally empty.
+        this.workspaceMetaEl.innerHTML = '';
     }
 
     private getViewportTransform(state: PatternState) {

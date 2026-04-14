@@ -178,6 +178,65 @@ img {
   border-color: #f1d596;
 }
 
+.context-bar {
+  background: #eaf2fb;
+  border-bottom: 1px solid #bdd4ec;
+  padding: 7px 18px;
+}
+
+.context-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.context-bar-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.context-field {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.context-field-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5a7a9a;
+}
+
+.context-field-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.context-bar-sep {
+  color: #a0b8d0;
+  font-size: 13px;
+  user-select: none;
+}
+
+.context-staging-note {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  border-radius: 4px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
 .editor-shell {
   flex: 1;
   padding: 12px;
@@ -315,8 +374,6 @@ img {
 }
 
 .workspace-meta {
-  min-height: 28px;
-  margin-bottom: 12px;
   font-size: 13px;
   color: var(--text);
 }

@@ -39,27 +39,31 @@ const en: Translations = {
     'status.connecting': 'Connecting...',
     'status.connectionError': 'Connection error',
     'status.unknown': 'Unknown',
-    'status.unsaved': 'Unsaved',
+    'status.unsaved': 'Edited',
     'status.saved': 'Saved',
 
     // operation messages — staging editor workflow
     'msg.ready': 'Ready',
     'msg.connecting': 'Connecting...',
     'msg.saving': 'Saving to editor...',
-    'msg.saved': 'Saved',
-    'msg.loading': 'Loading from editor...',
-    'msg.loaded': 'Loaded from editor',
-    'msg.loadSuccess': 'Loaded from editor',
+    'msg.saved': 'Saved to editor',
+    'msg.loading': 'Loading from library...',
+    'msg.loaded': 'Loaded from library',
+    'msg.loadSuccess': 'Loaded from library',
     'msg.saveSuccess': 'Saved to editor',
     'msg.loginFailed': 'Login failed. Check PLC Web API and credentials.',
     'msg.connectionError': 'Connection error',
     'msg.loadFailed': 'Load failed',
     'msg.saveFailed': 'Save failed',
+    'msg.validationFailed': 'Validation failed',
 
     // editing context strip
     'context.recipe': 'Recipe',
+    'context.name': 'Name',
     'context.layer': 'Layer',
     'context.pattern': 'Pattern',
+    'context.pallet': 'Pallet',
+    'context.stagingNote': 'Editing staged recipe',
 
     // inspector panel
     'inspector.noBox': 'No box selected',
@@ -115,27 +119,31 @@ const zhCN: Translations = {
     'status.connecting': '连接中...',
     'status.connectionError': '连接错误',
     'status.unknown': '未知',
-    'status.unsaved': '未保存',
+    'status.unsaved': '已编辑',
     'status.saved': '已保存',
 
     // operation messages — staging editor workflow
     'msg.ready': '就绪',
     'msg.connecting': '连接中...',
     'msg.saving': '正在保存到编辑器...',
-    'msg.saved': '已保存',
-    'msg.loading': '正在从编辑器加载...',
-    'msg.loaded': '已从编辑器加载',
-    'msg.loadSuccess': '已从编辑器加载',
+    'msg.saved': '已保存到编辑器',
+    'msg.loading': '正在从库加载...',
+    'msg.loaded': '已从库加载',
+    'msg.loadSuccess': '已从库加载',
     'msg.saveSuccess': '已保存到编辑器',
     'msg.loginFailed': '登录失败，请检查PLC Web API及凭据。',
     'msg.connectionError': '连接错误',
     'msg.loadFailed': '加载失败',
     'msg.saveFailed': '保存失败',
+    'msg.validationFailed': '验证失败',
 
     // editing context strip
     'context.recipe': '配方',
+    'context.name': '名称',
     'context.layer': '层',
     'context.pattern': '图案',
+    'context.pallet': '托盘',
+    'context.stagingNote': '编辑暂存配方',
 
     // inspector panel
     'inspector.noBox': '未选中箱子',

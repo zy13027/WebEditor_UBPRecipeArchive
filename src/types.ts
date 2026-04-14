@@ -81,7 +81,8 @@ export type OperationStatus =
     | 'load-error'
     | 'saving'
     | 'save-success'
-    | 'save-error';
+    | 'save-error'
+    | 'validation-error';
 
 
 
@@ -95,4 +96,3 @@ export type SyncState =
     | 'saving'
     | 'saved'
     | 'error';
-

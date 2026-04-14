@@ -257,10 +257,19 @@ async function bootstrap(): Promise<void> {
     saveBtn?.addEventListener("click", () => {
         void (async () => {
             try {
+                const currentState = store.getState();
+                if (currentState.boxes.length === 0) {
+                    store.setOperationStatus("validation-error");
+                    window.setTimeout(() => {
+                        store.clearOperationStatus();
+                    }, 2000);
+                    return;
+                }
+
                 // Empty message — renderer shows translated key for saving/save-success
                 store.setOperationStatus("saving");
 
-                const model = toPalletEditorModel(store.getState());
+                const model = toPalletEditorModel(currentState);
                 console.log("SAVE MODEL", model);
 
                 // Saves into DB_WebPalletEditor (staging editor DB).
