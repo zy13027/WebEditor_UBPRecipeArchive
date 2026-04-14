@@ -15,6 +15,7 @@ export interface PatternBox {
 export interface PatternState {
     recipeId: number;
     patternIndex: number;
+    selectedLayer: number;
     patternName: string;
 
     palletWidth: number;

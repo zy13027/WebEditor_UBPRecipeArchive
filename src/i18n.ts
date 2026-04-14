@@ -42,19 +42,24 @@ const en: Translations = {
     'status.unsaved': 'Unsaved',
     'status.saved': 'Saved',
 
-    // operation messages
+    // operation messages — staging editor workflow
     'msg.ready': 'Ready',
     'msg.connecting': 'Connecting...',
-    'msg.saving': 'Saving...',
+    'msg.saving': 'Saving to editor...',
     'msg.saved': 'Saved',
-    'msg.loading': 'Loading...',
-    'msg.loaded': 'Loaded from PLC',
-    'msg.loadSuccess': 'Load successful',
-    'msg.saveSuccess': 'Save successful',
+    'msg.loading': 'Loading from editor...',
+    'msg.loaded': 'Loaded from editor',
+    'msg.loadSuccess': 'Loaded from editor',
+    'msg.saveSuccess': 'Saved to editor',
     'msg.loginFailed': 'Login failed. Check PLC Web API and credentials.',
     'msg.connectionError': 'Connection error',
     'msg.loadFailed': 'Load failed',
     'msg.saveFailed': 'Save failed',
+
+    // editing context strip
+    'context.recipe': 'Recipe',
+    'context.layer': 'Layer',
+    'context.pattern': 'Pattern',
 
     // inspector panel
     'inspector.noBox': 'No box selected',
@@ -113,19 +118,24 @@ const zhCN: Translations = {
     'status.unsaved': '未保存',
     'status.saved': '已保存',
 
-    // operation messages
+    // operation messages — staging editor workflow
     'msg.ready': '就绪',
     'msg.connecting': '连接中...',
-    'msg.saving': '保存中...',
+    'msg.saving': '正在保存到编辑器...',
     'msg.saved': '已保存',
-    'msg.loading': '加载中...',
-    'msg.loaded': '已从PLC加载',
-    'msg.loadSuccess': '加载成功',
-    'msg.saveSuccess': '保存成功',
+    'msg.loading': '正在从编辑器加载...',
+    'msg.loaded': '已从编辑器加载',
+    'msg.loadSuccess': '已从编辑器加载',
+    'msg.saveSuccess': '已保存到编辑器',
     'msg.loginFailed': '登录失败，请检查PLC Web API及凭据。',
     'msg.connectionError': '连接错误',
     'msg.loadFailed': '加载失败',
     'msg.saveFailed': '保存失败',
+
+    // editing context strip
+    'context.recipe': '配方',
+    'context.layer': '层',
+    'context.pattern': '图案',
 
     // inspector panel
     'inspector.noBox': '未选中箱子',

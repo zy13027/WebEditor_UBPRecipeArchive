@@ -48,6 +48,7 @@ function toPalletEditorModel(state: ReturnType<EditorStore["getState"]>) {
 
         boxCount: state.boxes.length,
         selectedPattern: state.patternIndex,
+        selectedLayer: state.selectedLayer,
         selectedBox: state.selectedBoxId ?? 0,
         mirrorX: state.mirrorX,
         mirrorY: state.mirrorY,
@@ -163,7 +164,8 @@ async function bootstrap(): Promise<void> {
 
     async function loadPattern(): Promise<void> {
         try {
-            store.setOperationStatus("loading", "Loading pattern...");
+            // Status message left empty — renderer translates via switch-case
+            store.setOperationStatus("loading");
 
             const header = await readEditorHeader();
             console.log("HEADER", header);
@@ -181,6 +183,11 @@ async function bootstrap(): Promise<void> {
             console.log("BOXES", webBoxes);
 
             store.patch({
+                // Editing context — required for the context strip display
+                recipeId:     Number(header.recipeId ?? 0),
+                patternIndex: Number(header.selectedPattern ?? 1),
+                selectedLayer: Number(header.selectedLayer ?? 1),
+
                 patternName: header.name && header.name.trim() ? header.name : "Pattern",
                 palletLength,
                 palletWidth,
@@ -211,7 +218,8 @@ async function bootstrap(): Promise<void> {
                 dirty: false
             });
 
-            store.setOperationStatus("load-success", "Pattern loaded");
+            // Empty message — renderer shows translated key for load-success
+            store.setOperationStatus("load-success");
 
             window.setTimeout(() => {
                 store.clearOperationStatus();
@@ -249,15 +257,18 @@ async function bootstrap(): Promise<void> {
     saveBtn?.addEventListener("click", () => {
         void (async () => {
             try {
-                store.setOperationStatus("saving", "Saving pattern...");
+                // Empty message — renderer shows translated key for saving/save-success
+                store.setOperationStatus("saving");
 
                 const model = toPalletEditorModel(store.getState());
                 console.log("SAVE MODEL", model);
 
+                // Saves into DB_WebPalletEditor (staging editor DB).
+                // Final persistence to recipe library is handled by UCP/PLC flow.
                 await triggerSave(model);
 
                 store.patch({ dirty: false });
-                store.setOperationStatus("save-success", "Pattern saved");
+                store.setOperationStatus("save-success");
 
                 window.setTimeout(() => {
                     store.clearOperationStatus();

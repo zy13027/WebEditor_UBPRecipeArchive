@@ -26,6 +26,7 @@ export function fromPlcPattern(model: PalletEditorModel): PatternState {
 
         recipeId: model.recipeId,
         patternIndex: model.selectedPattern,
+        selectedLayer: model.selectedLayer,
 
         palletLength: model.palletLength_mm,
         palletWidth: model.palletWidth_mm,
@@ -89,6 +90,7 @@ export function toPlcPattern(state: PatternState): PalletEditorModel {
 
         boxCount: boxes.length,
         selectedPattern: state.patternIndex,
+        selectedLayer: state.selectedLayer,
         selectedBox: state.selectedBoxId ?? 0,
         mirrorX: state.mirrorX ?? false,
         mirrorY: state.mirrorY ?? false,

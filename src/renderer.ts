@@ -139,16 +139,19 @@ export class EditorRenderer {
     }
 
     private getOperationText(state: PatternState): string {
+        // operationMessage carries error detail or explicit override text.
+        // For normal load/save statuses, fall through to translated keys so
+        // the message stays correct when the UI language changes.
         if (state.operationMessage) {
             return state.operationMessage;
         }
 
         switch (state.operationStatus) {
-            case "loading":      return t('msg.loading');
-            case "load-success": return t('msg.loadSuccess');
+            case "loading":      return t('msg.loading');      // "Loading from editor..."
+            case "load-success": return t('msg.loadSuccess');  // "Loaded from editor"
             case "load-error":   return t('msg.loadFailed');
-            case "saving":       return t('msg.saving');
-            case "save-success": return t('msg.saveSuccess');
+            case "saving":       return t('msg.saving');       // "Saving to editor..."
+            case "save-success": return t('msg.saveSuccess');  // "Saved to editor"
             case "save-error":   return t('msg.saveFailed');
             default:             return "";
         }
@@ -179,7 +182,27 @@ export class EditorRenderer {
     }
 
     private renderWorkspaceMeta(state: PatternState): void {
+        const recipe  = state.recipeId      > 0 ? String(state.recipeId)      : '—';
+        const layer   = state.selectedLayer > 0 ? String(state.selectedLayer) : '—';
+        const pattern = state.patternIndex  > 0 ? String(state.patternIndex)  : '—';
+
         this.workspaceMetaEl.innerHTML = `
+      <div class="context-strip">
+        <span class="context-item">
+          <span class="context-label">${t('context.recipe')}</span>
+          <span class="context-value">${recipe}</span>
+        </span>
+        <span class="context-sep">·</span>
+        <span class="context-item">
+          <span class="context-label">${t('context.layer')}</span>
+          <span class="context-value">${layer}</span>
+        </span>
+        <span class="context-sep">·</span>
+        <span class="context-item">
+          <span class="context-label">${t('context.pattern')}</span>
+          <span class="context-value">${pattern}</span>
+        </span>
+      </div>
       <div class="meta-row"><strong>${state.patternName || t('label.unnamed')}</strong></div>
       <div class="meta-row">${state.palletLength} × ${state.palletWidth} mm</div>
     `;

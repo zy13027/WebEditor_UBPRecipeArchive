@@ -25,6 +25,7 @@ export interface PalletEditorModel {
 
     boxCount: number;
     selectedPattern: number;
+    selectedLayer: number;
     selectedBox: number;
     mirrorX: boolean;
     mirrorY: boolean;
@@ -59,6 +60,7 @@ export const PLC_PATHS = {
 
     boxCount: `${ROOT}.boxCount`,
     selectedPattern: `${ROOT}.selectedPattern`,
+    selectedLayer: `${ROOT}.selectedLayer`,
     selectedBox: `${ROOT}.selectedBox`,
     mirrorX: `${ROOT}.mirrorX`,
     mirrorY: `${ROOT}.mirrorY`,
@@ -114,6 +116,7 @@ export async function readEditorHeader(): Promise<Partial<PalletEditorModel>> {
         PLC_PATHS.mirrorY,
         PLC_PATHS.layerOffsetX_mm,
         PLC_PATHS.layerOffsetY_mm,
+        PLC_PATHS.selectedLayer,       // index 18
     ]);
 
     return {
@@ -135,6 +138,7 @@ export async function readEditorHeader(): Promise<Partial<PalletEditorModel>> {
         mirrorY: Boolean(values[15]),
         layerOffsetX_mm: Number(values[16] ?? 0),
         layerOffsetY_mm: Number(values[17] ?? 0),
+        selectedLayer: Number(values[18] ?? 1),
     };
 }
 
@@ -188,6 +192,7 @@ export async function readEditorSnapshot(): Promise<PalletEditorModel> {
 
         boxCount,
         selectedPattern: Number(header.selectedPattern ?? 1),
+        selectedLayer: Number(header.selectedLayer ?? 1),
         selectedBox: Number(header.selectedBox ?? 0),
         mirrorX: Boolean(header.mirrorX),
         mirrorY: Boolean(header.mirrorY),
@@ -214,6 +219,7 @@ export async function writeBoxes(boxes: WebBox[]): Promise<void> {
 export async function applyEditorSnapshot(model: PalletEditorModel): Promise<void> {
     await writeTag(PLC_PATHS.boxCount, model.boxes.length);
     await writeTag(PLC_PATHS.selectedPattern, model.selectedPattern);
+    await writeTag(PLC_PATHS.selectedLayer, model.selectedLayer);
     await writeTag(PLC_PATHS.selectedBox, model.selectedBox);
     await writeTag(PLC_PATHS.mirrorX, model.mirrorX);
     await writeTag(PLC_PATHS.mirrorY, model.mirrorY);
@@ -239,6 +245,7 @@ export async function writeEditor(model: PalletEditorModel): Promise<void> {
 
     await writeTag(PLC_PATHS.boxCount, model.boxCount);
     await writeTag(PLC_PATHS.selectedPattern, model.selectedPattern);
+    await writeTag(PLC_PATHS.selectedLayer, model.selectedLayer);
     await writeTag(PLC_PATHS.selectedBox, model.selectedBox);
     await writeTag(PLC_PATHS.mirrorX, model.mirrorX);
     await writeTag(PLC_PATHS.mirrorY, model.mirrorY);

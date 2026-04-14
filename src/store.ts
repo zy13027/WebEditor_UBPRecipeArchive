@@ -39,6 +39,7 @@ const initialState: PatternState = {
 
     recipeId: 0,
     patternIndex: 1,
+    selectedLayer: 1,
     mirrorX: false,
     mirrorY: false,
     layerOffsetX_mm: 0,
@@ -443,7 +444,7 @@ export class EditorStore {
         this.patch({
             connected: false,
             saving: false,
-            message: 'Loading from PLC...',
+            message: 'Loading from editor DB...',
             operationMessage: '',
         });
     }
@@ -451,9 +452,17 @@ export class EditorStore {
     loadSnapshot(snapshot: PatternState): void {
         this.state = {
             ...snapshot,
-            connected: true,
+            // Preserve runtime state — the snapshot carries pattern data only.
+            // connectionStatus and language are managed by the startup/polling flow
+            // and must not be overwritten when pattern data is (re-)loaded.
+            connectionStatus: this.state.connectionStatus,
+            connected: this.state.connected,
+            language: this.state.language,
+            selectionMode: false,
             saving: false,
-            operationMessage: 'Loaded from PLC',
+            dirty: false,
+            operationStatus: 'load-success',
+            operationMessage: '',
         };
         this.emit();
     }
@@ -470,7 +479,7 @@ export class EditorStore {
         this.patch({
             saving: false,
             connected: true,
-            operationMessage: 'Applied to PLC',
+            operationMessage: 'Staged to editor DB',
         });
     }
 
@@ -478,7 +487,7 @@ export class EditorStore {
         this.patch({
             saving: false,
             connected: true,
-            operationMessage: 'Saved to archive',
+            operationMessage: 'Saved to editor DB',
         });
     }
 
