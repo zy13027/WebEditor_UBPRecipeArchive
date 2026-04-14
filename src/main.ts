@@ -10,7 +10,9 @@ import {
     triggerSave,
     readEditorSnapshot,
     applyEditorSnapshot,
+    readHmiLanguageCode,
 } from "./services/pallet-editor.services";
+import { setLang, mapPlcLangCode } from "./i18n";
 
 import { EditorStore } from "./store";
 import { EditorRenderer } from "./renderer";
@@ -268,6 +270,21 @@ async function bootstrap(): Promise<void> {
     });
 
 
+    /**
+     * Reads the WinCC Unified language code from the PLC and updates the UI.
+     * Silently ignored on error — the UI stays in its current language.
+     */
+    async function pollHmiLanguage(): Promise<void> {
+        try {
+            const code = await readHmiLanguageCode();
+            const lang = mapPlcLangCode(code);
+            setLang(lang);
+            store.setLanguage(lang);
+        } catch {
+            // non-fatal: keep current language
+        }
+    }
+
     const teardown = () => {
         interactions.destroy();
         unsubscribe?.();
@@ -289,6 +306,10 @@ async function bootstrap(): Promise<void> {
 
         store.setConnectionStatus("connected");
         startPeriodicLogin(DEFAULT_PLC_IP);
+
+        // Sync language from HMI immediately, then every 5 s
+        await pollHmiLanguage();
+        window.setInterval(() => { void pollHmiLanguage(); }, 5000);
 
         await loadPattern();
     } catch (error) {

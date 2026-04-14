@@ -36,6 +36,13 @@ export interface PalletEditorModel {
 
 const ROOT = '"DB_WebPalletEditor"';
 
+/**
+ * WinCC Unified writes the active @CurrentLanguage code here.
+ * 1033 = English, 2052 = Simplified Chinese.
+ * Create this tag in TIA Portal as Int in a shared global DB.
+ */
+const HMI_LANG_TAG = '"DB_HMI_Global".languageCode';
+
 export const PLC_PATHS = {
     recipeId: `${ROOT}.header.recipeId`,
     name: `${ROOT}.header.name`,
@@ -376,4 +383,17 @@ export async function readCommandStatus(): Promise<EditorCommandStatus> {
         loadedBoxCount: Number(values[5] ?? 0),
         activatedRecipeId: Number(values[6] ?? 0),
     };
+}
+
+/**
+ * Reads the HMI language code written by WinCC Unified.
+ * Returns 1033 (English) on any read error so the UI stays functional.
+ */
+export async function readHmiLanguageCode(): Promise<number> {
+    try {
+        const value = await readTag<number>(HMI_LANG_TAG);
+        return Number(value ?? 1033);
+    } catch {
+        return 1033;
+    }
 }

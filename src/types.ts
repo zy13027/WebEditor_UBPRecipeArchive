@@ -38,6 +38,7 @@ export interface PatternState {
     layerOffsetX_mm: number;
     layerOffsetY_mm: number;
 
+    language: 'en' | 'zh-CN';
     selectionMode: boolean;
     dirty: boolean;
     syncState: 'idle' | 'loading' | 'loaded' | 'dirty' | 'applying' | 'applied' | 'saving' | 'saved' | 'error';

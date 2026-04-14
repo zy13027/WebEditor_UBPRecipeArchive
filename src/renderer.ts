@@ -1,5 +1,6 @@
 import type { PatternBox, PatternState } from "./types";
 import logoUrl from "./assets/SIEMENS_Logo.png";
+import { t } from "./i18n";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -11,6 +12,7 @@ export class EditorRenderer {
     private readonly svg: SVGSVGElement;
     private readonly palletGroup: SVGGElement;
     private readonly boxGroup: SVGGElement;
+    private lastRenderedLang = '';
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -34,18 +36,18 @@ export class EditorRenderer {
           <main class="editor-grid">
             <section class="card workspace-card">
               <div class="workspace-toolbar">
-                <button type="button" id="loadBtn" class="op-btn">Load</button>
-                <button type="button" id="saveBtn" class="op-btn primary">Save</button>
-                <button type="button" id="addBoxBtn" class="op-btn">Add Box</button>
-                <button type="button" id="rotateBoxBtn" class="op-btn secondary">Rotate Box</button>
-                <button type="button" id="selectModeBtn" class="op-btn select-mode">Select</button>
-                <button type="button" id="btnAlignH" class="op-btn secondary">Align Herizontally</button>
-                <button type="button" id="btnAlignV" class="op-btn secondary">Align Vertically</button>
-                <button type="button" id="deleteBoxBtn" class="op-btn danger">Delete Box</button>
+                <button type="button" id="loadBtn" class="op-btn">${t('btn.load')}</button>
+                <button type="button" id="saveBtn" class="op-btn primary">${t('btn.save')}</button>
+                <button type="button" id="addBoxBtn" class="op-btn">${t('btn.addBox')}</button>
+                <button type="button" id="rotateBoxBtn" class="op-btn secondary">${t('btn.rotateBox')}</button>
+                <button type="button" id="selectModeBtn" class="op-btn select-mode">${t('btn.select')}</button>
+                <button type="button" id="btnAlignH" class="op-btn secondary">${t('btn.alignH')}</button>
+                <button type="button" id="btnAlignV" class="op-btn secondary">${t('btn.alignV')}</button>
+                <button type="button" id="deleteBoxBtn" class="op-btn danger">${t('btn.deleteBox')}</button>
                 
               </div>
 
-              <div class="card-title">Workspace</div>
+              <div id="labelWorkspace" class="card-title">${t('label.workspace')}</div>
               <div id="workspaceMeta" class="workspace-meta"></div>
 
               <div class="workspace-stage">
@@ -54,7 +56,7 @@ export class EditorRenderer {
             </section>
 
             <aside class="card inspector-card">
-              <div class="card-title">Selected Box</div>
+              <div id="labelSelectedBox" class="card-title">${t('label.selectedBox')}</div>
               <div id="details" class="details"></div>
             </aside>
           </main>
@@ -86,6 +88,7 @@ export class EditorRenderer {
     }
 
     render(state: PatternState): void {
+        this.renderLabels(state);
         this.renderStatus(state);
         this.renderSelectionModeBtn(state);
         this.renderWorkspaceMeta(state);
@@ -94,25 +97,43 @@ export class EditorRenderer {
         this.renderDetails(state);
     }
 
+    /** Updates static toolbar/panel labels. Skipped when language has not changed. */
+    private renderLabels(state: PatternState): void {
+        if (state.language === this.lastRenderedLang) return;
+        this.lastRenderedLang = state.language;
+
+        const q = (id: string) => this.root.querySelector<HTMLElement>(`#${id}`);
+        const setText = (id: string, key: string) => {
+            const el = q(id);
+            if (el) el.textContent = t(key);
+        };
+
+        setText('loadBtn', 'btn.load');
+        setText('saveBtn', 'btn.save');
+        setText('addBoxBtn', 'btn.addBox');
+        setText('rotateBoxBtn', 'btn.rotateBox');
+        setText('btnAlignH', 'btn.alignH');
+        setText('btnAlignV', 'btn.alignV');
+        setText('deleteBoxBtn', 'btn.deleteBox');
+        setText('labelWorkspace', 'label.workspace');
+        setText('labelSelectedBox', 'label.selectedBox');
+    }
+
     private renderSelectionModeBtn(state: PatternState): void {
         const btn = this.root.querySelector<HTMLButtonElement>("#selectModeBtn");
         if (!btn) return;
         btn.classList.toggle("active", state.selectionMode);
         btn.textContent = state.selectionMode
-            ? `Select (${state.selectedIds.length})`
-            : "Select";
+            ? `${t('btn.select')} (${state.selectedIds.length})`
+            : t('btn.select');
     }
 
     private getConnectionText(state: PatternState): string {
         switch (state.connectionStatus) {
-            case "connected":
-                return "Connected";
-            case "connecting":
-                return "Connecting...";
-            case "error":
-                return "Connection error";
-            default:
-                return "Unknown";
+            case "connected":  return t('status.connected');
+            case "connecting": return t('status.connecting');
+            case "error":      return t('status.connectionError');
+            default:           return t('status.unknown');
         }
     }
 
@@ -122,20 +143,13 @@ export class EditorRenderer {
         }
 
         switch (state.operationStatus) {
-            case "loading":
-                return "Loading...";
-            case "load-success":
-                return "Load successful";
-            case "load-error":
-                return "Load failed";
-            case "saving":
-                return "Saving...";
-            case "save-success":
-                return "Save successful";
-            case "save-error":
-                return "Save failed";
-            default:
-                return "";
+            case "loading":      return t('msg.loading');
+            case "load-success": return t('msg.loadSuccess');
+            case "load-error":   return t('msg.loadFailed');
+            case "saving":       return t('msg.saving');
+            case "save-success": return t('msg.saveSuccess');
+            case "save-error":   return t('msg.saveFailed');
+            default:             return "";
         }
     }
 
@@ -157,7 +171,7 @@ export class EditorRenderer {
                 : ""
         }
         <div class="status-badge dirty ${state.dirty ? "unsaved" : "saved"}">
-          ${state.dirty ? "Unsaved" : "Saved"}
+          ${state.dirty ? t('status.unsaved') : t('status.saved')}
         </div>
       </div>
     `;
@@ -165,7 +179,7 @@ export class EditorRenderer {
 
     private renderWorkspaceMeta(state: PatternState): void {
         this.workspaceMetaEl.innerHTML = `
-      <div class="meta-row"><strong>${state.patternName || "Unnamed pattern"}</strong></div>
+      <div class="meta-row"><strong>${state.patternName || t('label.unnamed')}</strong></div>
       <div class="meta-row">${state.palletLength} × ${state.palletWidth} mm</div>
     `;
     }
@@ -278,19 +292,19 @@ export class EditorRenderer {
 
         if (!selectedBox) {
             this.detailsEl.innerHTML = `
-        <div class="detail-empty">No box selected</div>
+        <div class="detail-empty">${t('inspector.noBox')}</div>
       `;
             return;
         }
 
         this.detailsEl.innerHTML = `
       <div class="detail-grid">
-        <div class="detail-row"><span>ID</span><strong>${selectedBox.id}</strong></div>
-        <div class="detail-row"><span>X</span><strong>${selectedBox.x}</strong></div>
-        <div class="detail-row"><span>Y</span><strong>${selectedBox.y}</strong></div>
-        <div class="detail-row"><span>Width</span><strong>${selectedBox.w}</strong></div>
-        <div class="detail-row"><span>Length</span><strong>${selectedBox.l}</strong></div>
-        <div class="detail-row"><span>Rotation</span><strong>${selectedBox.rot}°</strong></div>
+        <div class="detail-row"><span>${t('inspector.id')}</span><strong>${selectedBox.id}</strong></div>
+        <div class="detail-row"><span>${t('inspector.x')}</span><strong>${selectedBox.x}</strong></div>
+        <div class="detail-row"><span>${t('inspector.y')}</span><strong>${selectedBox.y}</strong></div>
+        <div class="detail-row"><span>${t('inspector.width')}</span><strong>${selectedBox.w}</strong></div>
+        <div class="detail-row"><span>${t('inspector.length')}</span><strong>${selectedBox.l}</strong></div>
+        <div class="detail-row"><span>${t('inspector.rotation')}</span><strong>${selectedBox.rot}°</strong></div>
       </div>
     `;
     }

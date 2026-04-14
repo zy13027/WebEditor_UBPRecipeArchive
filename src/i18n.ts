@@ -8,6 +8,7 @@ const en: Translations = {
     'workspace': 'Workspace',
     'selectedBox': 'Selected Box',
 
+    // toolbar buttons
     'btn.add': 'Add',
     'btn.rotate': 'Rotate',
     'btn.alignX': 'Align X',
@@ -15,7 +16,14 @@ const en: Translations = {
     'btn.delete': 'Delete',
     'btn.load': 'Load',
     'btn.save': 'Save',
+    'btn.addBox': 'Add Box',
+    'btn.rotateBox': 'Rotate Box',
+    'btn.select': 'Select',
+    'btn.alignH': 'Align Horizontally',
+    'btn.alignV': 'Align Vertically',
+    'btn.deleteBox': 'Delete Box',
 
+    // tooltips
     'tip.add': 'Add box',
     'tip.rotate': 'Rotate selected',
     'tip.alignLeft': 'Align left',
@@ -24,21 +32,42 @@ const en: Translations = {
     'tip.load': 'Load from PLC',
     'tip.save': 'Save to PLC',
 
+    // connection / operation status
     'status.connected': 'Connected',
     'status.offline': 'Offline',
+    'status.connecting': 'Connecting...',
+    'status.connectionError': 'Connection error',
+    'status.unknown': 'Unknown',
     'status.unsaved': 'Unsaved',
     'status.saved': 'Saved',
 
+    // operation messages
     'msg.ready': 'Ready',
     'msg.connecting': 'Connecting...',
     'msg.saving': 'Saving...',
     'msg.saved': 'Saved',
     'msg.loading': 'Loading...',
     'msg.loaded': 'Loaded from PLC',
+    'msg.loadSuccess': 'Load successful',
+    'msg.saveSuccess': 'Save successful',
     'msg.loginFailed': 'Login failed. Check PLC Web API and credentials.',
     'msg.connectionError': 'Connection error',
     'msg.loadFailed': 'Load failed',
     'msg.saveFailed': 'Save failed',
+
+    // inspector panel
+    'inspector.noBox': 'No box selected',
+    'inspector.id': 'ID',
+    'inspector.x': 'X',
+    'inspector.y': 'Y',
+    'inspector.width': 'Width',
+    'inspector.length': 'Length',
+    'inspector.rotation': 'Rotation',
+
+    // misc labels
+    'label.workspace': 'Workspace',
+    'label.selectedBox': 'Selected Box',
+    'label.unnamed': 'Unnamed pattern',
 
     'lang.label': '中文',
 };
@@ -49,6 +78,7 @@ const zhCN: Translations = {
     'workspace': '工作区',
     'selectedBox': '选中的箱子',
 
+    // toolbar buttons
     'btn.add': '添加',
     'btn.rotate': '旋转',
     'btn.alignX': '对齐X',
@@ -56,7 +86,14 @@ const zhCN: Translations = {
     'btn.delete': '删除',
     'btn.load': '加载',
     'btn.save': '保存',
+    'btn.addBox': '添加箱子',
+    'btn.rotateBox': '旋转箱子',
+    'btn.select': '多选',
+    'btn.alignH': '水平对齐',
+    'btn.alignV': '垂直对齐',
+    'btn.deleteBox': '删除箱子',
 
+    // tooltips
     'tip.add': '添加箱子',
     'tip.rotate': '旋转选中',
     'tip.alignLeft': '左对齐',
@@ -65,21 +102,42 @@ const zhCN: Translations = {
     'tip.load': '从PLC加载',
     'tip.save': '保存到PLC',
 
+    // connection / operation status
     'status.connected': '已连接',
     'status.offline': '离线',
+    'status.connecting': '连接中...',
+    'status.connectionError': '连接错误',
+    'status.unknown': '未知',
     'status.unsaved': '未保存',
     'status.saved': '已保存',
 
+    // operation messages
     'msg.ready': '就绪',
     'msg.connecting': '连接中...',
     'msg.saving': '保存中...',
     'msg.saved': '已保存',
     'msg.loading': '加载中...',
     'msg.loaded': '已从PLC加载',
+    'msg.loadSuccess': '加载成功',
+    'msg.saveSuccess': '保存成功',
     'msg.loginFailed': '登录失败，请检查PLC Web API及凭据。',
     'msg.connectionError': '连接错误',
     'msg.loadFailed': '加载失败',
     'msg.saveFailed': '保存失败',
+
+    // inspector panel
+    'inspector.noBox': '未选中箱子',
+    'inspector.id': '编号',
+    'inspector.x': 'X',
+    'inspector.y': 'Y',
+    'inspector.width': '宽度',
+    'inspector.length': '长度',
+    'inspector.rotation': '旋转角',
+
+    // misc labels
+    'label.workspace': '工作区',
+    'label.selectedBox': '选中的箱子',
+    'label.unnamed': '未命名图案',
 
     'lang.label': 'EN',
 };
@@ -114,4 +172,14 @@ export function onLangChange(fn: (lang: Lang) => void): () => void {
         const idx = listeners.indexOf(fn);
         if (idx >= 0) listeners.splice(idx, 1);
     };
+}
+
+/**
+ * Maps WinCC Unified @CurrentLanguage codes to web-editor Lang.
+ * 2052 = Simplified Chinese, 1033 = English.
+ */
+export function mapPlcLangCode(code: number): Lang {
+    if (code === 2052) return 'zh-CN';
+    if (code === 1033) return 'en';
+    return 'en';
 }

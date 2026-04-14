@@ -23,6 +23,7 @@ const initialState: PatternState = {
     selectedIds: [],
     selectedBoxId: null,
 
+    language: 'en',
     selectionMode: false,
     dirty: false,
     syncState: 'idle',
@@ -167,6 +168,12 @@ export class EditorStore {
             selectedIds: [],
             selectedBoxId: null
         };
+        this.emit();
+    }
+
+    setLanguage(lang: 'en' | 'zh-CN'): void {
+        if (this.state.language === lang) return;
+        this.state = { ...this.state, language: lang };
         this.emit();
     }
 
