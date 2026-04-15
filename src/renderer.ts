@@ -29,6 +29,10 @@ export class EditorRenderer {
           </div>
 
           <div class="header-right">
+            <div class="lang-btn-group">
+              <button type="button" id="langZhBtn" class="lang-opt">中文</button>
+              <button type="button" id="langEnBtn" class="lang-opt">EN</button>
+            </div>
             <div id="statusText"></div>
           </div>
         </header>
@@ -93,6 +97,7 @@ export class EditorRenderer {
 
     render(state: PatternState): void {
         this.renderLabels(state);
+        this.renderLangBtn(state);
         this.renderStatus(state);
         this.renderContextBar(state);
         this.renderSelectionModeBtn(state);
@@ -122,6 +127,13 @@ export class EditorRenderer {
         setText('deleteBoxBtn', 'btn.deleteBox');
         setText('labelWorkspace', 'label.workspace');
         setText('labelSelectedBox', 'label.selectedBox');
+    }
+
+    private renderLangBtn(state: PatternState): void {
+        const zhBtn = this.root.querySelector<HTMLButtonElement>("#langZhBtn");
+        const enBtn = this.root.querySelector<HTMLButtonElement>("#langEnBtn");
+        if (zhBtn) zhBtn.classList.toggle("active", state.language === "zh-CN");
+        if (enBtn) enBtn.classList.toggle("active", state.language === "en");
     }
 
     private renderContextBar(state: PatternState): void {

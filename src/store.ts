@@ -23,7 +23,7 @@ const initialState: PatternState = {
     selectedIds: [],
     selectedBoxId: null,
 
-    language: 'en',
+    language: 'zh-CN',
     selectionMode: false,
     dirty: false,
     syncState: 'idle',
@@ -442,10 +442,9 @@ export class EditorStore {
 
     setLoading(): void {
         this.patch({
-            connected: false,
             saving: false,
-            message: 'Loading from editor DB...',
-            operationMessage: '',
+            operationStatus: 'loading',
+            operationMessage: '', // renderer translates via t('msg.loading')
         });
     }
 
@@ -470,31 +469,33 @@ export class EditorStore {
     setApplying(): void {
         this.patch({
             saving: true,
-            message: 'Applying to PLC...',
-            operationMessage: 'Applying to PLC...',
+            operationStatus: 'saving',
+            operationMessage: '', // renderer translates via t('msg.saving')
         });
     }
 
     setApplied(): void {
         this.patch({
             saving: false,
-            connected: true,
-            operationMessage: 'Staged to editor DB',
+            operationStatus: 'save-success',
+            operationMessage: '', // renderer translates via t('msg.saveSuccess')
         });
     }
 
     setSaved(): void {
         this.patch({
             saving: false,
-            connected: true,
-            operationMessage: 'Saved to editor DB',
+            dirty: false,
+            operationStatus: 'save-success',
+            operationMessage: '', // renderer translates via t('msg.saveSuccess')
         });
     }
 
     setError(message: string): void {
         this.patch({
             saving: false,
-            operationMessage: message,
+            operationStatus: 'save-error',
+            operationMessage: message, // explicit error text, not translated (contains detail)
         });
     }
 

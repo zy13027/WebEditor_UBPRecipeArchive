@@ -86,6 +86,16 @@ async function bootstrap(): Promise<void> {
     renderer.render(store.getState());
     interactions.bind();
 
+    // Language toggle buttons — manual override; PLC poll may re-sync after ~5 s
+    app.querySelector<HTMLButtonElement>("#langZhBtn")?.addEventListener("click", () => {
+        setLang("zh-CN");
+        store.setLanguage("zh-CN");
+    });
+    app.querySelector<HTMLButtonElement>("#langEnBtn")?.addEventListener("click", () => {
+        setLang("en");
+        store.setLanguage("en");
+    });
+
     const loadBtn = app.querySelector<HTMLButtonElement>("#loadBtn");
     const saveBtn = app.querySelector<HTMLButtonElement>("#saveBtn");
     const addBoxBtn = app.querySelector<HTMLButtonElement>("#addBoxBtn");
@@ -291,12 +301,19 @@ async function bootstrap(): Promise<void> {
 
 
     /**
-     * Reads the WinCC Unified language code from the PLC and updates the UI.
-     * Silently ignored on error — the UI stays in its current language.
+     * Language precedence (explicit):
+     *  1. Valid PLC code (1033 or 2052) → apply it; PLC wins.
+     *  2. null return (tag unreadable or unknown code) → keep current language.
+     *  3. Local default (zh-CN) is the fallback when no valid PLC code has
+     *     ever been received.
+     *
+     * This means a network glitch or uninitialised tag never silently resets
+     * the operator's display language.
      */
     async function pollHmiLanguage(): Promise<void> {
         try {
-            const code = await readHmiLanguageCode();
+            const code = await readHmiLanguageCode(); // null = no valid PLC data
+            if (code === null) return;                 // keep current language
             const lang = mapPlcLangCode(code);
             setLang(lang);
             store.setLanguage(lang);

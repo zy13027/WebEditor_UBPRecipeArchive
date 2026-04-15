@@ -29,8 +29,8 @@ const en: Translations = {
     'tip.alignLeft': 'Align left',
     'tip.alignTop': 'Align top',
     'tip.delete': 'Delete selected',
-    'tip.load': 'Load from PLC',
-    'tip.save': 'Save to PLC',
+    'tip.load': 'Load from staging editor',
+    'tip.save': 'Save to staging editor',
 
     // connection / operation status
     'status.connected': 'Connected',
@@ -47,9 +47,9 @@ const en: Translations = {
     'msg.connecting': 'Connecting...',
     'msg.saving': 'Saving to editor...',
     'msg.saved': 'Saved to editor',
-    'msg.loading': 'Loading from library...',
-    'msg.loaded': 'Loaded from library',
-    'msg.loadSuccess': 'Loaded from library',
+    'msg.loading': 'Loading into editor...',
+    'msg.loaded': 'Loaded into editor',
+    'msg.loadSuccess': 'Loaded into editor',
     'msg.saveSuccess': 'Saved to editor',
     'msg.loginFailed': 'Login failed. Check PLC Web API and credentials.',
     'msg.connectionError': 'Connection error',
@@ -109,8 +109,8 @@ const zhCN: Translations = {
     'tip.alignLeft': '左对齐',
     'tip.alignTop': '顶部对齐',
     'tip.delete': '删除选中',
-    'tip.load': '从PLC加载',
-    'tip.save': '保存到PLC',
+    'tip.load': '从暂存区加载',
+    'tip.save': '保存到暂存区',
 
     // connection / operation status
     'status.connected': '已连接',
@@ -127,9 +127,9 @@ const zhCN: Translations = {
     'msg.connecting': '连接中...',
     'msg.saving': '正在保存到编辑器...',
     'msg.saved': '已保存到编辑器',
-    'msg.loading': '正在从库加载...',
-    'msg.loaded': '已从库加载',
-    'msg.loadSuccess': '已从库加载',
+    'msg.loading': '正在加载到编辑器...',
+    'msg.loaded': '已加载到编辑器',
+    'msg.loadSuccess': '已加载到编辑器',
     'msg.saveSuccess': '已保存到编辑器',
     'msg.loginFailed': '登录失败，请检查PLC Web API及凭据。',
     'msg.connectionError': '连接错误',
@@ -164,7 +164,7 @@ const zhCN: Translations = {
 
 const dictionaries: Record<Lang, Translations> = { 'en': en, 'zh-CN': zhCN };
 
-let currentLang: Lang = 'en';
+let currentLang: Lang = 'zh-CN';
 const listeners: Array<(lang: Lang) => void> = [];
 
 export function getLang(): Lang {

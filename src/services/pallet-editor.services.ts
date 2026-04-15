@@ -38,11 +38,21 @@ export interface PalletEditorModel {
 const ROOT = '"DB_WebPalletEditor"';
 
 /**
- * WinCC Unified writes the active @CurrentLanguage code here.
- * 1033 = English, 2052 = Simplified Chinese.
- * Create this tag in TIA Portal as Int in a shared global DB.
+ * PLC language synchronisation tag (HMI → web editor).
+ *
+ * WinCC Unified / UCP writes the active @CurrentLanguage code here so the
+ * web editor can follow the operator's active display language.
+ *
+ * Current path : "DB_HMI_Global".languageCode  (shared global DB)
+ * Planned path : "DB_WebPalletEditor".uiLanguageCode  (once PLC side is updated)
+ *   → Update PLC_LANG_TAG below when the PLC contract changes.
+ *
+ * Known valid codes:
+ *   2052  →  zh-CN  (Simplified Chinese)
+ *   1033  →  en     (English)
+ *   any other value is treated as unknown — local default is preserved
  */
-const HMI_LANG_TAG = '"DB_HMI_Global".languageCode';
+const PLC_LANG_TAG = '"DB_HMI_Global".languageCode';
 
 export const PLC_PATHS = {
     recipeId: `${ROOT}.header.recipeId`,
@@ -83,6 +93,12 @@ export const PLC_PATHS = {
     stsLastError: `${ROOT}.status.lastError`,
     stsActivatedRecipeId: `${ROOT}.status.activatedRecipeId`,
     stsLoadedBoxCount: `${ROOT}.status.loadedBoxCount`,
+
+    /**
+     * Shared HMI→web language code tag.
+     * See PLC_LANG_TAG comment above for migration notes and valid values.
+     */
+    uiLanguageCode: PLC_LANG_TAG,
 };
 
 export function boxPath(
@@ -393,14 +409,27 @@ export async function readCommandStatus(): Promise<EditorCommandStatus> {
 }
 
 /**
- * Reads the HMI language code written by WinCC Unified.
- * Returns 1033 (English) on any read error so the UI stays functional.
+ * Reads the shared HMI→web language code from the PLC.
+ *
+ * Returns the raw numeric code (1033 or 2052) when the tag is reachable
+ * and its value is a recognised Unified language code.
+ *
+ * Returns `null` when:
+ *  - the tag cannot be read (PLC offline, auth error, tag missing)
+ *  - the value is not one of the known codes (0, garbage, uninitialised)
+ *
+ * Callers must treat null as "no information — keep current language"
+ * so a network glitch never silently resets the UI language to a wrong default.
  */
-export async function readHmiLanguageCode(): Promise<number> {
+export async function readHmiLanguageCode(): Promise<number | null> {
     try {
-        const value = await readTag<number>(HMI_LANG_TAG);
-        return Number(value ?? 1033);
+        const value = await readTag<number>(PLC_LANG_TAG);
+        const code = Number(value);
+        // Only propagate known-valid Unified language codes.
+        if (code === 1033 || code === 2052) return code;
+        return null;
     } catch {
-        return 1033;
+        // Tag unreadable — do not override local language default.
+        return null;
     }
 }
